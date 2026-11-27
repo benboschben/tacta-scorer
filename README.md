@@ -33,6 +33,20 @@ are small in the photo).
 
 Illegally placed cards are not detected; remove them before taking the photo.
 
+## Web version
+
+`web/` runs the same `tacta_score.py` in the browser with [Pyodide](https://pyodide.org), so photos never leave the phone and there is no server. `web/tacta_score.py` and `web/sample.jpg` are symlinks to the real files.
+
+Run it locally (any static server works; `file://` doesn't, because of the web worker):
+
+```
+python3 -m http.server -d web 8000
+```
+
+then open http://localhost:8000. The first load downloads Pyodide and OpenCV (about 20 MB) from the jsDelivr CDN; after that the browser caches them.
+
+Pushing to `main` runs the tests and publishes `web/` to GitHub Pages via `.github/workflows/pages.yml`. One-time setup: Settings > Pages > Source: GitHub Actions.
+
 Tests (the real-photo tests use the hand-counted photos in `samples/`):
 
     .venv/bin/python -m pytest

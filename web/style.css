@@ -1,0 +1,177 @@
+:root {
+  /* Card colors, darkened just enough for white text to read on them. */
+  --red: #c93636;
+  --orange: #d0660a;
+  --green: #3f8f2a;
+  --blue: #2370b8;
+  --purple: #7347ab;
+  --pink: #cf3f8b;
+
+  --paper: #eef1f4;
+  --surface: #ffffff;
+  --ink: #1d2733;
+  --muted: #566372;
+  --line: #d3d9e0;
+  --track: #e2e7ec;
+  --error: #b4231f;
+  --focus: #2370b8;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #151b22;
+    --surface: #1e262f;
+    --ink: #e8edf2;
+    --muted: #9aa7b5;
+    --line: #2f3a46;
+    --track: #27313b;
+    --error: #ff8a80;
+    --focus: #7fb6ec;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1.0625rem/1.55 "Gabarito", system-ui, sans-serif;
+}
+
+main {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 3rem;
+}
+
+h1, h2 { line-height: 1.15; margin: 0; }
+h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+p { margin: 0; }
+a { color: inherit; text-underline-offset: 0.18em; }
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+section { margin-top: 2.5rem; }
+
+/* Masthead: the six card colors, each with a scoring dot. */
+.dots { display: flex; gap: 0.375rem; margin-bottom: 1.25rem; }
+.dots span {
+  width: 2rem; height: 2rem; border-radius: 0.375rem;
+  background: radial-gradient(circle, #fff 0 0.32rem, transparent 0.36rem), var(--c);
+}
+.lede { margin-top: 0.5rem; color: var(--muted); font-size: 1.1875rem; max-width: 32ch; }
+
+/* The one big action. */
+.shoot { margin-top: 2rem; }
+.shutter {
+  position: relative;
+  display: grid;
+  gap: 0.25rem;
+  padding: 1.5rem 1.5rem 1.375rem;
+  border-radius: 1rem;
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.shutter:active { transform: scale(0.985); }
+.shutter input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.shutter:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 3px; }
+.shutter-main { font-size: 1.5rem; font-weight: 800; }
+.shutter-sub { opacity: 0.75; }
+.shutter.is-busy { opacity: 0.6; cursor: progress; }
+.shutter.is-busy input { cursor: progress; }
+
+.link {
+  margin-top: 0.75rem;
+  padding: 0.25rem 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+.link:disabled { opacity: 0.5; cursor: progress; }
+
+.status { margin-top: 0.5rem; min-height: 1.55em; color: var(--muted); }
+.status[data-kind="error"] { color: var(--error); font-weight: 600; }
+
+/* Player chips. */
+.hint { color: var(--muted); max-width: 60ch; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.875rem; }
+.chip {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 1rem 0 0.75rem;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 600 1rem/1 "Gabarito", system-ui, sans-serif;
+  cursor: pointer;
+}
+.chip::before {
+  content: ""; width: 1rem; height: 1rem; border-radius: 50%;
+  background: var(--c);
+}
+.chip[aria-pressed="true"] { background: var(--c); border-color: var(--c); color: #fff; }
+.chip[aria-pressed="true"]::before { background: #fff; }
+
+/* Scoreboard: each player's bar is their card color, as long as their score. */
+.verdict { font-size: 1.375rem; font-weight: 600; margin-bottom: 1rem; }
+.board { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.row {
+  display: grid;
+  grid-template-columns: 5.75rem 1fr 3rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+.row-name {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--c);
+  color: #fff;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.row-bar { height: 0.875rem; border-radius: 999px; background: var(--track); overflow: hidden; }
+.row-bar::before {
+  content: ""; display: block; height: 100%;
+  width: calc(var(--share) * 100%);
+  border-radius: inherit;
+  background: var(--c);
+}
+.row-points { font-weight: 800; font-size: 1.5rem; text-align: right; font-variant-numeric: tabular-nums; }
+.row.is-winner .row-name { padding-block: 0.875rem; }
+.row.is-winner .row-bar { height: 1.375rem; }
+.row.is-winner .row-points { font-size: 2.25rem; }
+
+.check { margin: 1.5rem 0 0; }
+.check img {
+  display: block; width: 100%; height: auto;
+  border-radius: 0.75rem; background: var(--track);
+}
+.check figcaption { margin-top: 0.625rem; color: var(--muted); font-size: 0.9375rem; }
+
+.tips ul { margin: 0; padding-left: 1.25rem; }
+.tips li + li { margin-top: 0.25rem; }
+
+footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9375rem; }
+footer p + p { margin-top: 0.5rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .shutter { transition: none; }
+}
