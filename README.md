@@ -40,10 +40,11 @@ Illegally placed cards are not detected; remove them before taking the photo.
 Run it locally (any static server works; `file://` doesn't, because of the web worker):
 
 ```
+python3 scripts/vendor_pyodide.py
 python3 -m http.server -d web 8000
 ```
 
-then open http://localhost:8000. The first load downloads Pyodide and OpenCV (about 20 MB) from the jsDelivr CDN; after that the browser caches them.
+then open http://localhost:8000. The first command copies Pyodide and the numpy and OpenCV wheels (about 27 MB) into `web/pyodide/`, which is git-ignored; it downloads the Pyodide release once into `.cache/`. The site serves these itself rather than loading them from a CDN. Pyodide 314 runs only in module workers, so `worker.js` is one.
 
 Pushing to `main` runs the tests and publishes `web/` to GitHub Pages via `.github/workflows/pages.yml`. One-time setup: Settings > Pages > Source: GitHub Actions.
 

@@ -20,7 +20,7 @@ let scorerReady = false;
 let bootStep = "Getting the scorer ready"; // last loading step the worker reported
 let workerDied = null; // error text once the worker has crashed
 
-const worker = new Worker("worker.js");
+const worker = new Worker("worker.js", { type: "module" });
 
 // A worker that dies while starting (its script failed to load, or it ran
 // out of memory) sends no message at all, so listen for that too.
@@ -101,7 +101,7 @@ async function readPhoto(blob) {
 }
 
 function waitingText() {
-  return `Photo read. ${bootStep}… The first visit downloads about 20 MB, so this can take a minute.`;
+  return `Photo read. ${bootStep}… The first visit downloads about 27 MB, so this can take a minute.`;
 }
 
 function score(photo) {

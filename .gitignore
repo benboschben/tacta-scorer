@@ -3,3 +3,6 @@ __pycache__/
 .pytest_cache/
 # Debug output from --debug
 check.png
+# Pyodide copied in by scripts/vendor_pyodide.py
+web/pyodide/
+.cache/
