@@ -37,6 +37,13 @@ jobs:
       - uses: actions/checkout@v4
       # -L copies the files web/ symlinks to (the scorer and a sample photo).
       - run: mkdir _site && cp -RL web/. _site/
+      # Serve Pyodide and OpenCV from the site itself. The 340 MB release is
+      # cached between runs; the script copies about 27 MB of it.
+      - uses: actions/cache@v4
+        with:
+          path: .cache/pyodide
+          key: pyodide-${{ hashFiles('scripts/vendor_pyodide.py') }}
+      - run: python3 scripts/vendor_pyodide.py --out _site/pyodide
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

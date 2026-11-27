@@ -1,5 +1,6 @@
 // Runs tacta_score.py in Pyodide, off the main thread so the page stays
-// responsive while OpenCV loads and works.
+// responsive while OpenCV loads and works. A module worker: Pyodide 314
+// refuses to run in a classic one.
 //
 // Messages in:  {type: "score", rgba: ArrayBuffer, width, height, players: [color, ...]}
 // Messages out: {type: "status", text}
@@ -7,7 +8,9 @@
 //               {type: "result", scores, winners, present, dots, image: Uint8Array (JPEG)}
 //               {type: "error", message}
 
-const PYODIDE = "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/";
+// Served by this site (see scripts/vendor_pyodide.py), not a CDN: some
+// networks and content blockers stop scripts from cdn.jsdelivr.net.
+const PYODIDE = new URL("pyodide/", self.location).href;
 
 const GLUE = `
 import json, sys
@@ -35,12 +38,14 @@ const status = (text) => postMessage({ type: "status", text });
 
 async function boot() {
   status("Downloading Python");
-  // Inside boot so a failed download rejects `ready` and reaches the page as
-  // an error message, instead of killing the worker before it can reply.
+  // A dynamic import inside boot, so a failed download rejects `ready` and
+  // reaches the page as an error message instead of killing the worker.
+  let loadPyodide;
   try {
-    importScripts(PYODIDE + "pyodide.js");
-  } catch {
-    throw new Error("Python couldn't be downloaded. Check your connection, or turn off any content blocker for this site.");
+    ({ loadPyodide } = await import(PYODIDE + "pyodide.mjs"));
+  } catch (err) {
+    console.error(err);
+    throw new Error("Python couldn't be downloaded. Check your connection and reload the page.");
   }
   const pyodide = await loadPyodide({ indexURL: PYODIDE });
   status("Downloading OpenCV");
