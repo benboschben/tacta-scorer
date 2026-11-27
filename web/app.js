@@ -16,8 +16,20 @@ const chosen = new Set();
 let lastPhoto = null; // {rgba, width, height} of the current photo, for re-scoring
 let busy = false;
 let checkUrl = null;
+let scorerReady = false;
+let bootStep = "Getting the scorer ready"; // last loading step the worker reported
+let workerDied = null; // error text once the worker has crashed
 
 const worker = new Worker("worker.js");
+
+// A worker that dies while starting (its script failed to load, or it ran
+// out of memory) sends no message at all, so listen for that too.
+worker.onerror = (event) => {
+  event.preventDefault();
+  workerDied = `The scorer stopped: ${event.message || "it failed to start"}. Reload the page to try again.`;
+  setBusy(false);
+  setStatus(workerDied, "error");
+};
 
 function setStatus(text, kind = "") {
   statusEl.textContent = text;
@@ -34,9 +46,11 @@ function setBusy(value) {
 worker.onmessage = ({ data }) => {
   switch (data.type) {
     case "status":
-      setStatus(`${data.text}…`);
+      if (!scorerReady) bootStep = data.text;
+      setStatus(busy && !scorerReady ? waitingText() : `${data.text}…`);
       break;
     case "ready":
+      scorerReady = true;
       if (!busy) setStatus("Ready when you are.");
       break;
     case "result":
@@ -86,8 +100,20 @@ async function readPhoto(blob) {
   return { rgba: data.buffer, width, height };
 }
 
+function waitingText() {
+  return `Photo read. ${bootStep}… The first visit downloads about 20 MB, so this can take a minute.`;
+}
+
 function score(photo) {
+  if (workerDied) {
+    setBusy(false);
+    setStatus(workerDied, "error");
+    return;
+  }
   setBusy(true);
+  // The worker queues the photo until it has loaded; say so rather than
+  // leaving "Reading photo…" up for the whole download.
+  if (!scorerReady) setStatus(waitingText());
   // Send a copy so the original stays available for re-scoring.
   const rgba = photo.rgba.slice(0);
   const players = COLORS.filter((c) => chosen.has(c));

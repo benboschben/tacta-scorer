@@ -8,7 +8,6 @@
 //               {type: "error", message}
 
 const PYODIDE = "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/";
-importScripts(PYODIDE + "pyodide.js");
 
 const GLUE = `
 import json, sys
@@ -35,9 +34,16 @@ def run(width, height, players_json):
 const status = (text) => postMessage({ type: "status", text });
 
 async function boot() {
-  status("Loading Python");
+  status("Downloading Python");
+  // Inside boot so a failed download rejects `ready` and reaches the page as
+  // an error message, instead of killing the worker before it can reply.
+  try {
+    importScripts(PYODIDE + "pyodide.js");
+  } catch {
+    throw new Error("Python couldn't be downloaded. Check your connection, or turn off any content blocker for this site.");
+  }
   const pyodide = await loadPyodide({ indexURL: PYODIDE });
-  status("Loading OpenCV");
+  status("Downloading OpenCV");
   await pyodide.loadPackage(["numpy", "opencv-python"]);
   const source = await fetch("tacta_score.py");
   if (!source.ok) throw new Error(`Couldn't load the scorer (HTTP ${source.status}).`);
